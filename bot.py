@@ -1,107 +1,37 @@
+import random
+from threading import Thread
 import telebot
 from telebot import types
+import cfg
 import time
-import random
-import misc
 
-token = misc.token
-bot = telebot.TeleBot(token)
+Langs = types.ReplyKeyboardMarkup(resize_keyboard=True)
+bl1 = types.KeyboardButton('English 🇬🇧')
+bl2 = types.KeyboardButton('Русский 🇷🇺')
+bl3 = types.KeyboardButton('Кыргызча 🇰🇬')
+start = types.KeyboardButton('/start')
+b4eng = types.KeyboardButton('Stop')
+b4rus = types.KeyboardButton('Остановить')
+b4ukr = types.KeyboardButton('Токтотуу')
+Langs.add(bl1, bl2)
+Langs.add(bl3)
+Langs.add(start)
 
+time_Eng = types.ReplyKeyboardMarkup(resize_keyboard=True)
+t1 = types.KeyboardButton('30')
+t2 = types.KeyboardButton('60')
+time_Eng.add(t1, t2)
+time_Eng.add(b4eng)
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.send_message(
-        message.chat.id,
-        '''Добро пожаловать.\nПолезные команды для навигации:\nДля выхода в главное меню напишите /end или /start
-        ''',
-        reply_markup=start_keyboard())
+time_Rus = types.ReplyKeyboardMarkup(resize_keyboard=True)
+time_Rus.add(t1, t2)
+time_Rus.add(b4rus)
 
+time_Kgz = types.ReplyKeyboardMarkup(resize_keyboard=True)
+time_Kgz.add(t1, t2)
+time_Kgz.add(b4ukr)
 
-@bot.message_handler(content_types=["text"])
-def send_anytext(message):
-    chat_id = message.chat.id
-    if message.text == 'English':
-        bot.send_message(chat_id, 'Вы выбрали язык English', reply_markup=eng_lang())
-    elif message.text == 'Русский':
-        bot.send_message(chat_id, 'Вы выбрали язык Русский', reply_markup=rus_lang())
-    elif message.text == 'Кыргызча':
-        bot.send_message(chat_id, 'Вы выбрали язык Кыргызча', reply_markup=kgz_lang())
-    elif message.text == '🔙':
-        bot.send_message(chat_id, 'Вы вышли в меню выбора', reply_markup=start_keyboard())
-    elif message.text == '/end':
-        bot.send_message(chat_id, 'Вы вышли в главное меню', reply_markup=start_keyboard())
-
-    # if message.text == 'Остановить':
-    #     s = start_timer_30m + 1
-    #     # break
-    #     return s
-
-    # i = True
-    # if message.text == 'Напомни через 30 минут':
-    #     while i:
-    #         time.sleep(5)
-    #         bot.send_message(chat_id, '{}'.format(random_rus_30m()), reply_markup=start_stop_button_rus())
-    #         if message.text == 'Остановить':
-    #             return bot.send_message(chat_id, 'Вы остановили бот', reply_markup=rus_lang())
-
-    while True:
-        if message.text == 'Напомни через 30 минут':
-            time.sleep(5)
-            bot.send_message(chat_id, '{}'.format(random_rus_30m()), reply_markup=start_stop_button_rus())
-        elif message.text == 'Остановить':
-            break
-    # if message.text == 'Остановить':
-    #     return bot.send_message(chat_id, 'Вы остановили бот', reply_markup=rus_lang())
-
-    # while message.text == 'Напомни через 1 час':
-    #     time.sleep(9)
-    #     return bot.send_message(chat_id, '{}'.format(random_rus_1h()), reply_markup=start_stop_button_rus())
-    # if message.text != 'Напомни через 1 час':
-    #     break
-    # if message.text == 'Остановить':
-    #     return i + 5, bot.send_message(chat_id, 'Вы остановили бот', reply_markup=rus_lang())
-
-
-def start_keyboard():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True, resize_keyboard=True)
-    markup.add('English', 'Русский', 'Кыргызча')
-    return markup
-
-
-def rus_lang():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('Напомни через 30 минут', 'Напомни через 1 час', '🔙')
-    return markup
-
-
-def kgz_lang():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('30 мүнөттөн кийин эскерт', '1 сааттан кийин эскерт', '🔙')
-    return markup
-
-
-def eng_lang():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('Remind after 30 minutes', 'Remind after 1 hour', '🔙')
-    return markup
-
-
-def start_stop_button_eng():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('Stop', '🔙')
-    return markup
-
-
-def start_stop_button_rus():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('Остановить', '🔙')
-    return markup
-
-
-def start_stop_button_kgz():
-    markup = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=False, resize_keyboard=True)
-    markup.add('Токтотуу', '🔙')
-    return markup
+bot = telebot.TeleBot(cfg.token)
 
 
 def random_rus_30m():
@@ -189,5 +119,72 @@ def random_kgz_30m():
     return random.choice(text)
 
 
-if __name__ == "__main__":
-    bot.polling(none_stop=True)
+@bot.message_handler(commands=['start'])
+def welcome(m):
+    if m.chat.id in cfg.users:
+        pass
+    else:
+        cfg.users[m.chat.id] = {'lang': 'eng', 'work': False, 'say': 0}
+        bot.send_message(m.chat.id, 'Выберите язык', reply_markup=Langs)
+        print('New user:', m.from_user.first_name, m.from_user.last_name, 'nick:', m.from_user.username)
+
+
+@bot.message_handler(content_types=['text'])
+def answers(m):
+    def func_thread():
+        if m.text == 'English 🇬🇧':
+            cfg.users[m.chat.id]['lang'] = 'eng'
+            bot.send_message(m.chat.id, 'Choose time', reply_markup=time_Eng)
+        elif m.text == 'Русский 🇷🇺':
+            cfg.users[m.chat.id]['lang'] = 'rus'
+            bot.send_message(m.chat.id, 'Выберите время', reply_markup=time_Rus)
+        elif m.text == 'Кыргызча 🇰🇬':
+            cfg.users[m.chat.id]['lang'] = 'kgz'
+            bot.send_message(m.chat.id, 'Убакытты тандаңыз', reply_markup=time_Kgz)
+        if m.text == '30':
+            cfg.users[m.chat.id]['say'] = 30
+            cfg.users[m.chat.id]['work'] = True
+        if m.text == '60':
+            cfg.users[m.chat.id]['say'] = 60
+            cfg.users[m.chat.id]['work'] = True
+        if m.text == 'Stop' or m.text == 'Остановить' or m.text == 'Токтотуу':
+            cfg.users[m.chat.id]['work'] = False
+            if m.text == 'Stop':
+                bot.send_message(m.chat.id, 'Stopped!', reply_markup=Langs)
+            elif m.text == 'Остановить':
+                bot.send_message(m.chat.id, 'Остановлено!', reply_markup=Langs)
+            elif m.text == 'Токтотуу':
+                bot.send_message(m.chat.id, 'Токтотулду!', reply_markup=Langs)
+        if 22 <= int(time.strftime('%H')) <= 7:
+            pass
+        else:
+            while cfg.users[m.chat.id]['work'] == True:
+                if cfg.users[m.chat.id]['lang'] == 'rus':
+                    if m.text == '30':
+                        bot.send_message(m.chat.id, random_rus_30m())
+                        time.sleep(1800)
+                    elif m.text == '60':
+                        bot.send_message(m.chat.id, random_rus_1h())
+                        time.sleep(3600)
+                elif cfg.users[m.chat.id]['lang'] == 'kgz':
+                    if m.text == '30':
+                        bot.send_message(m.chat.id, random_kgz_30m())
+                        time.sleep(1800)
+                    if m.text == '60':
+                        bot.send_message(m.chat.id, random_kgz_30m())
+                        time.sleep(3600)
+                elif cfg.users[m.chat.id]['lang'] == 'eng':
+                    if m.text == '30':
+                        bot.send_message(m.chat.id, random_eng_30m())
+                        time.sleep(1800)
+                    if m.text == '60':
+                        bot.send_message(m.chat.id, random_eng_1h())
+                        time.sleep(3600)
+
+    if __name__ == '__main__':
+        Thread(target=func_thread).start()
+
+try:
+    bot.polling(none_stop=True, interval=0, timeout=60)
+except Exception as E:
+    print(E)
