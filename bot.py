@@ -110,15 +110,15 @@ def random_kgz():
 @bot.message_handler(commands=['start'])
 def welcome(m):
     def start_thread():
-        if m.chat.id in cfg.users:
-            pass
-        else:
-            outfile = open('users.txt', 'a')
-            cfg.users[m.chat.id] = {'lang': 'rus', 'work30': False, 'work60': False, 'say': 0}
-            outfile.write(str(m.from_user.first_name + '\n'))
-            outfile.close()
-            bot.send_message(m.chat.id, 'Выберите язык', reply_markup=Langs)
-            print('New user:', m.from_user.first_name, m.from_user.last_name, 'nick:', m.from_user.username)
+        # if m.chat.id in cfg.users:
+        #     pass
+        # else:
+        outfile = open('users.txt', 'a')
+        cfg.users[m.chat.id] = {'lang': 'rus', 'work30': False, 'work60': False, 'say': 0}
+        outfile.write(str(m.from_user.first_name + '\n'))
+        outfile.close()
+        bot.send_message(m.chat.id, 'Выберите язык', reply_markup=Langs)
+        print('New user:', m.from_user.first_name, m.from_user.last_name, 'nick:', m.from_user.username)
 
     if __name__ == '__main__':
         Thread(target=start_thread).start()
